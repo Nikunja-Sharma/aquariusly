@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Unified AI</string>
+    <string name="app_name">Aquariusly</string>
     <!-- Get this from Firebase Console > Project Settings > Your apps > Web client ID -->
     <string name="default_web_client_id">24604630852-igeu4ngrok2bac48lkpa1njfamieq8qj.apps.googleusercontent.com</string>
 </resources>

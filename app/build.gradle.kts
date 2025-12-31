@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-    namespace = "com.nikunja.testapp"
+    namespace = "com.nikunja.aquariusly"
     compileSdk = 35
 
     defaultConfig {
