@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.nikunja.aquariusly.ui.components.UnifiedAILogo
+import com.nikunja.aquariusly.ui.components.AquariuslyLogo
 import com.nikunja.aquariusly.ui.theme.UnifiedTheme
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -150,7 +150,7 @@ private fun OnboardingPageContent(
     ) {
         // Show logo on first page, emoji on others
         if (pageIndex == 0) {
-            UnifiedAILogo(size = 100.dp)
+            AquariuslyLogo(size = 100.dp)
         } else {
             val accentColor = when (pageIndex) {
                 1 -> colors.accentViolet

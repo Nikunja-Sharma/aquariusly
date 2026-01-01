@@ -26,7 +26,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.nikunja.aquariusly.R
-import com.nikunja.aquariusly.ui.components.UnifiedAILogo
+import com.nikunja.aquariusly.ui.components.AquariuslyLogo
 import com.nikunja.aquariusly.ui.theme.UnifiedTheme
 import kotlinx.coroutines.launch
 
@@ -100,8 +100,8 @@ private fun LoginContent(
             ) {
                 Spacer(modifier = Modifier.weight(0.25f))
                 
-                // Clean iconic logo
-                UnifiedAILogo(size = 100.dp)
+                // Premium Aquariusly logo
+                AquariuslyLogo(size = 100.dp)
                 
                 Spacer(modifier = Modifier.height(24.dp))
                 

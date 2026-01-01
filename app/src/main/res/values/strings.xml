@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Aquariusly</string>
-    <!-- Get this from Firebase Console > Project Settings > Your apps > Web client ID -->
-    <string name="default_web_client_id">24604630852-igeu4ngrok2bac48lkpa1njfamieq8qj.apps.googleusercontent.com</string>
+    <!-- Web client ID from Google Cloud Console -->
+    <string name="default_web_client_id">614873690360-s1osbnns4eknkfglrmvqo37p841m7o2f.apps.googleusercontent.com</string>
 </resources>
