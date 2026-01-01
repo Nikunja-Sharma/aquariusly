@@ -1,6 +1,7 @@
 package com.nikunja.aquariusly.di
 
-import com.google.firebase.auth.FirebaseAuth
+import com.nikunja.aquariusly.data.remote.api.AuthApiService
+import com.nikunja.aquariusly.data.remote.interceptor.CookieInterceptor
 import com.nikunja.aquariusly.data.repository.AuthRepositoryImpl
 import com.nikunja.aquariusly.domain.repository.AuthRepository
 import dagger.Module
@@ -15,11 +16,10 @@ object AuthModule {
 
     @Provides
     @Singleton
-    fun provideFirebaseAuth(): FirebaseAuth = FirebaseAuth.getInstance()
-
-    @Provides
-    @Singleton
-    fun provideAuthRepository(firebaseAuth: FirebaseAuth): AuthRepository {
-        return AuthRepositoryImpl(firebaseAuth)
+    fun provideAuthRepository(
+        authApiService: AuthApiService,
+        cookieInterceptor: CookieInterceptor
+    ): AuthRepository {
+        return AuthRepositoryImpl(authApiService, cookieInterceptor)
     }
 }

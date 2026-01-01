@@ -26,9 +26,24 @@ class ProfileViewModel @Inject constructor(
         loadUser()
     }
 
-    private fun loadUser() {
-        val user = getCurrentUserUseCase()
-        _state.update { it.copy(user = user) }
+    fun loadUser() {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+            
+            when (val result = getCurrentUserUseCase()) {
+                is Resource.Success -> {
+                    _state.update { it.copy(isLoading = false, user = result.data) }
+                }
+                is Resource.Error -> {
+                    _state.update { it.copy(isLoading = false, error = result.message) }
+                }
+                is Resource.Loading -> Unit
+            }
+        }
+    }
+
+    fun refresh() {
+        loadUser()
     }
 
     fun signOut() {

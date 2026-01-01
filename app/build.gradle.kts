@@ -22,12 +22,19 @@ android {
     }
 
     buildTypes {
-        release {
+        debug {
             isMinifyEnabled = false
+            buildConfigField("String", "BASE_URL", "\"http://localhost:3000/api/\"")
+            buildConfigField("Boolean", "DEBUG_MODE", "true")
+        }
+        release {
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "BASE_URL", "\"http://localhost:3000/api/\"")
+            buildConfigField("Boolean", "DEBUG_MODE", "false")
         }
     }
     compileOptions {
@@ -39,6 +46,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -85,6 +93,9 @@ dependencies {
     // Coroutines
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
+    
+    // Security
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
     
     // Testing
     testImplementation(libs.junit)

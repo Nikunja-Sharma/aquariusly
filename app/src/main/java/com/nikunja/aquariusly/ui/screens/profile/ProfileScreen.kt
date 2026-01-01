@@ -27,9 +27,15 @@ import com.nikunja.aquariusly.ui.theme.UnifiedTheme
 @Composable
 fun ProfileScreen(
     onSignOut: () -> Unit,
+    onSettingsClick: () -> Unit = {},
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    // Refresh user data when screen becomes visible
+    LaunchedEffect(Unit) {
+        viewModel.refresh()
+    }
 
     LaunchedEffect(state.isSignedOut) {
         if (state.isSignedOut) {
@@ -39,7 +45,8 @@ fun ProfileScreen(
 
     ProfileContent(
         state = state,
-        onSignOutClick = viewModel::signOut
+        onSignOutClick = viewModel::signOut,
+        onSettingsClick = onSettingsClick
     )
 }
 
@@ -47,7 +54,8 @@ fun ProfileScreen(
 @Composable
 private fun ProfileContent(
     state: ProfileState,
-    onSignOutClick: () -> Unit
+    onSignOutClick: () -> Unit,
+    onSettingsClick: () -> Unit
 ) {
     val colors = UnifiedTheme.colors
     
@@ -91,7 +99,7 @@ private fun ProfileContent(
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                SettingsOption()
+                SettingsOption(onClick = onSettingsClick)
             }
             
             Spacer(modifier = Modifier.weight(1f))
@@ -298,10 +306,11 @@ private fun StatItem(value: String, label: String) {
 }
 
 @Composable
-private fun SettingsOption() {
+private fun SettingsOption(onClick: () -> Unit) {
     val colors = UnifiedTheme.colors
     
     Card(
+        onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = colors.cardBackground),
