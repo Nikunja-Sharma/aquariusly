@@ -4,10 +4,10 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.google.firebase.auth.FirebaseAuth
 import com.nikunja.aquariusly.ui.screens.chat.ChatScreen
 import com.nikunja.aquariusly.ui.screens.home.HomeScreen
 import com.nikunja.aquariusly.ui.screens.login.LoginScreen
@@ -19,9 +19,10 @@ import com.nikunja.aquariusly.ui.screens.settings.SettingsScreen
 fun NavGraph(
     navController: NavHostController,
     hasCompletedOnboarding: Boolean,
-    initialChatId: String? = null
+    initialChatId: String? = null,
+    authViewModel: AuthViewModel = hiltViewModel()
 ) {
-    val isLoggedIn = FirebaseAuth.getInstance().currentUser != null
+    val isLoggedIn = authViewModel.isLoggedIn
     
     val startDestination = when {
         !hasCompletedOnboarding -> Screen.Onboarding.route

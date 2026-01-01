@@ -33,7 +33,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("String", "BASE_URL", "\"http://localhost:3000/api/\"")
+            buildConfigField("String", "BASE_URL", "\"https://aquariusly-backend.vercel.app/api/\"")
             buildConfigField("Boolean", "DEBUG_MODE", "false")
         }
     }
