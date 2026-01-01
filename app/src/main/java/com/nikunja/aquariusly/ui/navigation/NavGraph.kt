@@ -3,7 +3,8 @@ package com.nikunja.aquariusly.ui.navigation
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -22,7 +23,7 @@ fun NavGraph(
     initialChatId: String? = null,
     authViewModel: AuthViewModel = hiltViewModel()
 ) {
-    val isLoggedIn = authViewModel.isLoggedIn
+    val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
     
     val startDestination = when {
         !hasCompletedOnboarding -> Screen.Onboarding.route

@@ -49,7 +49,7 @@ class CookieInterceptor @Inject constructor(
         return response
     }
 
-    private fun getCookies(): String {
+    fun getCookies(): String {
         val accessToken = prefs.getString(KEY_ACCESS_TOKEN, null)
         val refreshToken = prefs.getString(KEY_REFRESH_TOKEN, null)
 
@@ -61,6 +61,14 @@ class CookieInterceptor @Inject constructor(
     }
 
     private fun saveCookie(setCookieHeader: String) {
+        parseCookieHeader(setCookieHeader)
+    }
+    
+    fun saveCookieFromHeader(setCookieHeader: String) {
+        parseCookieHeader(setCookieHeader)
+    }
+    
+    private fun parseCookieHeader(setCookieHeader: String) {
         val parts = setCookieHeader.split(";").first().split("=", limit = 2)
         if (parts.size == 2) {
             val name = parts[0].trim()
