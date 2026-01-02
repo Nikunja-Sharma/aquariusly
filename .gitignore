@@ -63,6 +63,7 @@ obj/
 # Keystore files (NEVER commit these!)
 *.jks
 *.keystore
+keystore.properties
 
 # Google Services (contains API keys)
 google-services.json

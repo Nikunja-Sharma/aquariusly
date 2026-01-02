@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Aquariusly</string>
-    <!-- Web client ID from Google Cloud Console -->
-    <string name="default_web_client_id">614873690360-s1osbnns4eknkfglrmvqo37p841m7o2f.apps.googleusercontent.com</string>
+    <!-- Web client ID from Google Cloud Console (client_type: 3) -->
+    <string name="default_web_client_id">614873690360-677bb2ahiv8bd8p2jqm1ops5p7kb7em1.apps.googleusercontent.com</string>
 </resources>

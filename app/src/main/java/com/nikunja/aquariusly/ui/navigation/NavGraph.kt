@@ -14,6 +14,7 @@ import com.nikunja.aquariusly.ui.screens.home.HomeScreen
 import com.nikunja.aquariusly.ui.screens.login.LoginScreen
 import com.nikunja.aquariusly.ui.screens.onboarding.OnboardingScreen
 import com.nikunja.aquariusly.ui.screens.profile.ProfileScreen
+import com.nikunja.aquariusly.ui.screens.profileedit.ProfileEditScreen
 import com.nikunja.aquariusly.ui.screens.settings.SettingsScreen
 
 @Composable
@@ -117,8 +118,24 @@ fun NavGraph(
                 onBackClick = {
                     navController.popBackStack()
                 },
+                onEditProfileClick = {
+                    navController.navigate(Screen.ProfileEdit.route)
+                },
+                onSignOut = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
+        }
+        
+        composable(route = Screen.ProfileEdit.route) {
+            ProfileEditScreen(
+                onBackClick = {
+                    navController.popBackStack()
+                },
                 onProfileUpdated = {
-                    // Profile will reload when navigating back due to ViewModel init
+                    // Profile will reload when navigating back
                 }
             )
         }

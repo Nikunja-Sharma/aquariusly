@@ -7,6 +7,15 @@ plugins {
     alias(libs.plugins.google.gms.google.services)
 }
 
+import java.util.Properties
+
+// Load keystore properties
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+val keystoreProperties = Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(keystorePropertiesFile.inputStream())
+}
+
 android {
     namespace = "com.nikunja.aquariusly"
     compileSdk = 35
@@ -21,19 +30,32 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            if (keystorePropertiesFile.exists()) {
+                storeFile = file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         debug {
             isMinifyEnabled = false
-            buildConfigField("String", "BASE_URL", "\"http://localhost:3000/api/\"")
+            signingConfig = signingConfigs.getByName("release")
+            buildConfigField("String", "BASE_URL", "\"https://ai-api.isdev.in/api/\"")
             buildConfigField("Boolean", "DEBUG_MODE", "true")
         }
         release {
             isMinifyEnabled = true
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("String", "BASE_URL", "\"https://aquariusly-backend.vercel.app/api/\"")
+            buildConfigField("String", "BASE_URL", "\"https://ai-api.isdev.in/api/\"")
             buildConfigField("Boolean", "DEBUG_MODE", "false")
         }
     }

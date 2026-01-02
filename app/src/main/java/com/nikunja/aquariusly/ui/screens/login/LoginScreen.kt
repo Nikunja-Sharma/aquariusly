@@ -245,10 +245,13 @@ private suspend fun signInWithGoogle(
     try {
         val credentialManager = CredentialManager.create(context)
         
+        val webClientId = context.getString(R.string.default_web_client_id)
+        android.util.Log.d("GoogleSignIn", "Using web client ID: $webClientId")
+        
         val googleIdOption = GetGoogleIdOption.Builder()
             .setFilterByAuthorizedAccounts(false)
             .setAutoSelectEnabled(false)
-            .setServerClientId(context.getString(R.string.default_web_client_id))
+            .setServerClientId(webClientId)
             .build()
         
         val request = GetCredentialRequest.Builder()
@@ -258,13 +261,22 @@ private suspend fun signInWithGoogle(
         val result = credentialManager.getCredential(context, request)
         val credential = result.credential
         
+        android.util.Log.d("GoogleSignIn", "Credential type: ${credential.type}")
+        
         val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
         val idToken = googleIdTokenCredential.idToken
         
+        android.util.Log.d("GoogleSignIn", "Got idToken: ${idToken.take(50)}...")
+        
         onTokenReceived(idToken)
     } catch (e: androidx.credentials.exceptions.NoCredentialException) {
-        onError("No Google account found. Please check your setup.")
+        android.util.Log.e("GoogleSignIn", "NoCredentialException", e)
+        onError("No Google account found. Please add a Google account to your device.")
+    } catch (e: androidx.credentials.exceptions.GetCredentialCancellationException) {
+        android.util.Log.e("GoogleSignIn", "User cancelled", e)
+        onError("Sign in cancelled")
     } catch (e: Exception) {
-        onError(e.message ?: "Sign in failed")
+        android.util.Log.e("GoogleSignIn", "Sign in failed", e)
+        onError("Sign in failed: ${e.message}")
     }
 }

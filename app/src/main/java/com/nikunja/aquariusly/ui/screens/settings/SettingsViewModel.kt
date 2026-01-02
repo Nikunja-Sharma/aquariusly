@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nikunja.aquariusly.domain.usecase.GetUserProfileUseCase
 import com.nikunja.aquariusly.domain.usecase.SignOutUseCase
-import com.nikunja.aquariusly.domain.usecase.UpdateProfileUseCase
 import com.nikunja.aquariusly.domain.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +16,6 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val getUserProfileUseCase: GetUserProfileUseCase,
-    private val updateProfileUseCase: UpdateProfileUseCase,
     private val signOutUseCase: SignOutUseCase
 ) : ViewModel() {
 
@@ -34,13 +32,7 @@ class SettingsViewModel @Inject constructor(
             
             when (val result = getUserProfileUseCase()) {
                 is Resource.Success -> {
-                    _state.update { 
-                        it.copy(
-                            isLoading = false, 
-                            profile = result.data,
-                            editedName = result.data?.name ?: ""
-                        ) 
-                    }
+                    _state.update { it.copy(isLoading = false, profile = result.data) }
                 }
                 is Resource.Error -> {
                     _state.update { it.copy(isLoading = false, error = result.message) }
@@ -50,32 +42,28 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun onNameChange(name: String) {
-        _state.update { it.copy(editedName = name, saveSuccess = false) }
+    fun toggleDarkMode() {
+        _state.update { it.copy(isDarkMode = !it.isDarkMode) }
     }
 
-    fun saveProfile() {
-        val currentName = _state.value.editedName.trim()
-        if (currentName.isBlank()) {
-            _state.update { it.copy(error = "Name cannot be empty") }
-            return
-        }
+    fun toggleNotifications() {
+        _state.update { it.copy(notificationsEnabled = !it.notificationsEnabled) }
+    }
 
+    fun toggleHapticFeedback() {
+        _state.update { it.copy(hapticFeedback = !it.hapticFeedback) }
+    }
+
+    fun signOut() {
         viewModelScope.launch {
-            _state.update { it.copy(isSaving = true, error = null, saveSuccess = false) }
+            _state.update { it.copy(isSigningOut = true) }
             
-            when (val result = updateProfileUseCase(currentName)) {
+            when (signOutUseCase()) {
                 is Resource.Success -> {
-                    _state.update { 
-                        it.copy(
-                            isSaving = false, 
-                            profile = result.data,
-                            saveSuccess = true
-                        ) 
-                    }
+                    _state.update { it.copy(isSigningOut = false, isSignedOut = true) }
                 }
                 is Resource.Error -> {
-                    _state.update { it.copy(isSaving = false, error = result.message) }
+                    _state.update { it.copy(isSigningOut = false, error = "Failed to sign out") }
                 }
                 is Resource.Loading -> Unit
             }
@@ -84,9 +72,5 @@ class SettingsViewModel @Inject constructor(
 
     fun clearError() {
         _state.update { it.copy(error = null) }
-    }
-
-    fun clearSaveSuccess() {
-        _state.update { it.copy(saveSuccess = false) }
     }
 }

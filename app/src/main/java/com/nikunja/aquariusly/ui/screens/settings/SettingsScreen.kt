@@ -1,6 +1,7 @@
 package com.nikunja.aquariusly.ui.screens.settings
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -8,8 +9,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,7 +31,8 @@ import com.nikunja.aquariusly.ui.theme.UnifiedTheme
 @Composable
 fun SettingsScreen(
     onBackClick: () -> Unit,
-    onProfileUpdated: () -> Unit = {},
+    onEditProfileClick: () -> Unit,
+    onSignOut: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -42,10 +46,9 @@ fun SettingsScreen(
         }
     }
 
-    LaunchedEffect(state.saveSuccess) {
-        if (state.saveSuccess) {
-            onProfileUpdated()
-            onBackClick()
+    LaunchedEffect(state.isSignedOut) {
+        if (state.isSignedOut) {
+            onSignOut()
         }
     }
 
@@ -76,218 +79,445 @@ fun SettingsScreen(
             )
         }
     ) { paddingValues ->
-        if (state.isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(color = colors.accentBlue)
-            }
-        } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .verticalScroll(rememberScrollState())
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(24.dp)
-            ) {
-                // Profile Section
-                ProfileSection(
-                    photoUrl = state.profile?.picture,
-                    email = state.profile?.email ?: "",
-                    colors = colors
-                )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Profile Card
+            ProfileCard(
+                name = state.profile?.name ?: "",
+                email = state.profile?.email ?: "",
+                photoUrl = state.profile?.picture,
+                onClick = onEditProfileClick,
+                colors = colors
+            )
 
-                // Edit Name Section
-                EditNameSection(
-                    name = state.editedName,
-                    onNameChange = viewModel::onNameChange,
-                    onSave = viewModel::saveProfile,
-                    isSaving = state.isSaving,
+            // Subscription & Billing
+            SettingsSection(title = "Subscription & Billing", colors = colors) {
+                SettingsNavigationItem(
+                    icon = Icons.Default.Star,
+                    title = "Current Plan",
+                    subtitle = "Pro Plan • Active",
+                    onClick = { },
                     colors = colors
                 )
-
-                // Account Info Section
-                AccountInfoSection(
-                    email = state.profile?.email ?: "",
+                SettingsNavigationItem(
+                    icon = Icons.Default.Add,
+                    title = "Credits",
+                    subtitle = "1,250 credits remaining",
+                    onClick = { },
+                    colors = colors
+                )
+                SettingsNavigationItem(
+                    icon = Icons.Default.ShoppingCart,
+                    title = "Buy Credits",
+                    subtitle = "Purchase additional credits",
+                    onClick = { },
+                    colors = colors
+                )
+                SettingsNavigationItem(
+                    icon = Icons.Default.DateRange,
+                    title = "Billing History",
+                    subtitle = "View past invoices",
+                    onClick = { },
+                    colors = colors
+                )
+                SettingsNavigationItem(
+                    icon = Icons.Default.Refresh,
+                    title = "Manage Subscription",
+                    subtitle = "Upgrade, downgrade or cancel",
+                    onClick = { },
                     colors = colors
                 )
             }
+
+            // General Settings
+            SettingsSection(title = "General", colors = colors) {
+                SettingsToggleItem(
+                    icon = Icons.Default.Settings,
+                    title = "Dark Mode",
+                    subtitle = "Use dark theme",
+                    isChecked = state.isDarkMode,
+                    onToggle = viewModel::toggleDarkMode,
+                    colors = colors
+                )
+                SettingsToggleItem(
+                    icon = Icons.Default.Notifications,
+                    title = "Notifications",
+                    subtitle = "Receive push notifications",
+                    isChecked = state.notificationsEnabled,
+                    onToggle = viewModel::toggleNotifications,
+                    colors = colors
+                )
+                SettingsToggleItem(
+                    icon = Icons.Default.Phone,
+                    title = "Haptic Feedback",
+                    subtitle = "Vibrate on interactions",
+                    isChecked = state.hapticFeedback,
+                    onToggle = viewModel::toggleHapticFeedback,
+                    colors = colors
+                )
+            }
+
+            // AI Settings
+            SettingsSection(title = "AI Configuration", colors = colors) {
+                SettingsNavigationItem(
+                    icon = Icons.Default.Star,
+                    title = "Model Selection",
+                    subtitle = "Choose your AI model",
+                    onClick = { },
+                    colors = colors
+                )
+                SettingsNavigationItem(
+                    icon = Icons.Default.Build,
+                    title = "MCP Servers",
+                    subtitle = "Configure Model Context Protocol",
+                    onClick = { },
+                    colors = colors
+                )
+                SettingsNavigationItem(
+                    icon = Icons.Default.Search,
+                    title = "RAG Settings",
+                    subtitle = "Retrieval Augmented Generation",
+                    onClick = { },
+                    colors = colors
+                )
+                SettingsNavigationItem(
+                    icon = Icons.Default.Create,
+                    title = "System Prompt",
+                    subtitle = "Customize AI behavior",
+                    onClick = { },
+                    colors = colors
+                )
+                SettingsNavigationItem(
+                    icon = Icons.Default.Settings,
+                    title = "Temperature",
+                    subtitle = "Control response creativity",
+                    onClick = { },
+                    colors = colors
+                )
+                SettingsNavigationItem(
+                    icon = Icons.Default.List,
+                    title = "Max Tokens",
+                    subtitle = "Set response length limit",
+                    onClick = { },
+                    colors = colors
+                )
+            }
+
+            // Chat Settings
+            SettingsSection(title = "Chat", colors = colors) {
+                SettingsNavigationItem(
+                    icon = Icons.Default.Refresh,
+                    title = "Chat History",
+                    subtitle = "Manage your conversations",
+                    onClick = { },
+                    colors = colors
+                )
+                SettingsToggleItem(
+                    icon = Icons.Default.Send,
+                    title = "Stream Responses",
+                    subtitle = "Show responses as they generate",
+                    isChecked = true,
+                    onToggle = { },
+                    colors = colors
+                )
+                SettingsNavigationItem(
+                    icon = Icons.Default.Delete,
+                    title = "Clear All Chats",
+                    subtitle = "Delete all conversation history",
+                    onClick = { },
+                    colors = colors
+                )
+            }
+
+            // Privacy & Security
+            SettingsSection(title = "Privacy & Security", colors = colors) {
+                SettingsNavigationItem(
+                    icon = Icons.Default.Lock,
+                    title = "Privacy",
+                    subtitle = "Manage your data",
+                    onClick = { },
+                    colors = colors
+                )
+                SettingsNavigationItem(
+                    icon = Icons.Default.Check,
+                    title = "Security",
+                    subtitle = "App lock and authentication",
+                    onClick = { },
+                    colors = colors
+                )
+            }
+
+            // Support
+            SettingsSection(title = "Support", colors = colors) {
+                SettingsNavigationItem(
+                    icon = Icons.Default.Info,
+                    title = "Help Center",
+                    subtitle = "FAQs and guides",
+                    onClick = { },
+                    colors = colors
+                )
+                SettingsNavigationItem(
+                    icon = Icons.Default.Email,
+                    title = "Send Feedback",
+                    subtitle = "Report bugs or suggest features",
+                    onClick = { },
+                    colors = colors
+                )
+                SettingsNavigationItem(
+                    icon = Icons.Default.Info,
+                    title = "About",
+                    subtitle = "Version 1.0.0",
+                    onClick = { },
+                    colors = colors
+                )
+            }
+
+            // Sign Out
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            SignOutButton(
+                isLoading = state.isSigningOut,
+                onClick = viewModel::signOut,
+                colors = colors
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
 
 @Composable
-private fun ProfileSection(
-    photoUrl: String?,
+private fun ProfileCard(
+    name: String,
     email: String,
+    photoUrl: String?,
+    onClick: () -> Unit,
     colors: UnifiedAIColors
 ) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(16.dp),
+        color = colors.surfaceElevated
     ) {
-        Box(
-            modifier = Modifier
-                .size(100.dp)
-                .clip(CircleShape)
-                .background(colors.surfaceElevated),
-            contentAlignment = Alignment.Center
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            if (photoUrl != null) {
-                AsyncImage(
-                    model = photoUrl,
-                    contentDescription = "Profile photo",
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(CircleShape)
+                    .background(colors.cardBackground),
+                contentAlignment = Alignment.Center
+            ) {
+                if (photoUrl != null) {
+                    AsyncImage(
+                        model = photoUrl,
+                        contentDescription = "Profile photo",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        Icons.Outlined.Person,
+                        contentDescription = null,
+                        modifier = Modifier.size(28.dp),
+                        tint = colors.textMuted
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = name.ifEmpty { "Set your name" },
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = colors.textPrimary
                 )
-            } else {
-                Icon(
-                    Icons.Default.Person,
-                    contentDescription = null,
-                    modifier = Modifier.size(48.dp),
-                    tint = colors.textMuted
+                Text(
+                    text = email,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colors.textSecondary
                 )
             }
+
+            Icon(
+                Icons.Outlined.Edit,
+                contentDescription = "Edit profile",
+                tint = colors.textMuted,
+                modifier = Modifier.size(20.dp)
+            )
         }
+    }
+}
 
-        Spacer(modifier = Modifier.height(12.dp))
-
+@Composable
+private fun SettingsSection(
+    title: String,
+    colors: UnifiedAIColors,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Column {
         Text(
-            text = email,
-            style = MaterialTheme.typography.bodyMedium,
-            color = colors.textSecondary
+            text = title,
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.SemiBold,
+            color = colors.textSecondary,
+            modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
+        )
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            color = colors.surfaceElevated
+        ) {
+            Column(content = content)
+        }
+    }
+}
+
+@Composable
+private fun SettingsToggleItem(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    subtitle: String,
+    isChecked: Boolean,
+    onToggle: () -> Unit,
+    colors: UnifiedAIColors
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onToggle)
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = colors.textSecondary,
+            modifier = Modifier.size(24.dp)
+        )
+        
+        Spacer(modifier = Modifier.width(16.dp))
+        
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+                color = colors.textPrimary
+            )
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = colors.textMuted
+            )
+        }
+        
+        Switch(
+            checked = isChecked,
+            onCheckedChange = { onToggle() },
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = colors.textPrimary,
+                checkedTrackColor = colors.accentBlue,
+                uncheckedThumbColor = colors.textMuted,
+                uncheckedTrackColor = colors.borderDefault
+            )
         )
     }
 }
 
 @Composable
-private fun EditNameSection(
-    name: String,
-    onNameChange: (String) -> Unit,
-    onSave: () -> Unit,
-    isSaving: Boolean,
+private fun SettingsNavigationItem(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit,
     colors: UnifiedAIColors
 ) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        color = colors.surfaceElevated
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = colors.textSecondary,
+            modifier = Modifier.size(24.dp)
+        )
+        
+        Spacer(modifier = Modifier.width(16.dp))
+        
+        Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "Profile",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
                 color = colors.textPrimary
             )
-
-            OutlinedTextField(
-                value = name,
-                onValueChange = onNameChange,
-                label = { Text("Display Name") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = colors.accentBlue,
-                    unfocusedBorderColor = colors.borderDefault,
-                    focusedLabelColor = colors.accentBlue,
-                    unfocusedLabelColor = colors.textMuted,
-                    cursorColor = colors.accentBlue,
-                    focusedTextColor = colors.textPrimary,
-                    unfocusedTextColor = colors.textPrimary
-                ),
-                shape = RoundedCornerShape(12.dp)
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = colors.textMuted
             )
-
-            Button(
-                onClick = onSave,
-                enabled = !isSaving && name.isNotBlank(),
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = colors.accentBlue,
-                    contentColor = colors.textPrimary
-                )
-            ) {
-                if (isSaving) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        color = colors.textPrimary,
-                        strokeWidth = 2.dp
-                    )
-                } else {
-                    Icon(
-                        Icons.Default.Check,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Save Changes")
-                }
-            }
         }
+        
+        Icon(
+            Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            contentDescription = null,
+            tint = colors.textMuted,
+            modifier = Modifier.size(20.dp)
+        )
     }
 }
 
 @Composable
-private fun AccountInfoSection(
-    email: String,
+private fun SignOutButton(
+    isLoading: Boolean,
+    onClick: () -> Unit,
     colors: UnifiedAIColors
 ) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        color = colors.surfaceElevated
+    OutlinedButton(
+        onClick = onClick,
+        enabled = !isLoading,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(52.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = ButtonDefaults.outlinedButtonColors(
+            contentColor = colors.error
+        ),
+        border = androidx.compose.foundation.BorderStroke(1.dp, colors.error.copy(alpha = 0.5f))
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Text(
-                text = "Account",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = colors.textPrimary
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(20.dp),
+                color = colors.error,
+                strokeWidth = 2.dp
             )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Email",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = colors.textMuted
-                )
-                Text(
-                    text = email,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = colors.textPrimary
-                )
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Sign-in method",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = colors.textMuted
-                )
-                Text(
-                    text = "Google",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = colors.textPrimary
-                )
-            }
+        } else {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                "Sign Out",
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Medium
+            )
         }
     }
 }
