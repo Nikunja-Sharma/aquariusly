@@ -3,6 +3,7 @@ package com.nikunja.aquariusly.di
 import android.content.Context
 import com.nikunja.aquariusly.BuildConfig
 import com.nikunja.aquariusly.data.remote.api.AuthApiService
+import com.nikunja.aquariusly.data.remote.api.NotificationApiService
 import com.nikunja.aquariusly.data.remote.api.UserApiService
 import com.nikunja.aquariusly.data.remote.interceptor.CookieInterceptor
 import com.nikunja.aquariusly.data.remote.interceptor.TokenRefreshInterceptor
@@ -77,5 +78,11 @@ object NetworkModule {
     @Singleton
     fun provideUserApiService(retrofit: Retrofit): UserApiService {
         return retrofit.create(UserApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideNotificationApiService(retrofit: Retrofit): NotificationApiService {
+        return retrofit.create(NotificationApiService::class.java)
     }
 }

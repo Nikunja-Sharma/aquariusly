@@ -2,6 +2,7 @@ package com.nikunja.aquariusly.ui.screens.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nikunja.aquariusly.domain.usecase.RegisterFcmTokenUseCase
 import com.nikunja.aquariusly.domain.usecase.SignInWithGoogleUseCase
 import com.nikunja.aquariusly.domain.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,7 +15,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val signInWithGoogleUseCase: SignInWithGoogleUseCase
+    private val signInWithGoogleUseCase: SignInWithGoogleUseCase,
+    private val registerFcmTokenUseCase: RegisterFcmTokenUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(LoginState())
@@ -30,6 +32,8 @@ class LoginViewModel @Inject constructor(
             
             when (val result = signInWithGoogleUseCase(idToken)) {
                 is Resource.Success -> {
+                    // Register FCM token after successful login
+                    registerFcmToken()
                     _state.update { it.copy(isLoading = false, isSigningIn = false, isLoggedIn = true) }
                 }
                 is Resource.Error -> {
@@ -39,6 +43,12 @@ class LoginViewModel @Inject constructor(
                     _state.update { it.copy(isLoading = true) }
                 }
             }
+        }
+    }
+
+    private fun registerFcmToken() {
+        viewModelScope.launch {
+            registerFcmTokenUseCase()
         }
     }
 
