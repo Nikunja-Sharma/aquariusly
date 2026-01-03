@@ -20,16 +20,20 @@ class LoginViewModel @Inject constructor(
     private val _state = MutableStateFlow(LoginState())
     val state: StateFlow<LoginState> = _state.asStateFlow()
 
+    fun setSigningIn(signingIn: Boolean) {
+        _state.update { it.copy(isSigningIn = signingIn) }
+    }
+
     fun signInWithGoogle(idToken: String) {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
             
             when (val result = signInWithGoogleUseCase(idToken)) {
                 is Resource.Success -> {
-                    _state.update { it.copy(isLoading = false, isLoggedIn = true) }
+                    _state.update { it.copy(isLoading = false, isSigningIn = false, isLoggedIn = true) }
                 }
                 is Resource.Error -> {
-                    _state.update { it.copy(isLoading = false, error = result.message) }
+                    _state.update { it.copy(isLoading = false, isSigningIn = false, error = result.message) }
                 }
                 is Resource.Loading -> {
                     _state.update { it.copy(isLoading = true) }

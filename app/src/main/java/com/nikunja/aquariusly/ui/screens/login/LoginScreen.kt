@@ -57,6 +57,7 @@ fun LoginScreen(
         state = state,
         snackbarHostState = snackbarHostState,
         onGoogleSignInClick = {
+            viewModel.setSigningIn(true)
             scope.launch {
                 signInWithGoogle(
                     context = context,
@@ -64,6 +65,7 @@ fun LoginScreen(
                         viewModel.signInWithGoogle(idToken)
                     },
                     onError = { error ->
+                        viewModel.setSigningIn(false)
                         scope.launch {
                             snackbarHostState.showSnackbar(error)
                         }
@@ -130,7 +132,7 @@ private fun LoginContent(
                 
                 GoogleSignInButton(
                     onClick = onGoogleSignInClick,
-                    isLoading = state.isLoading
+                    isLoading = state.isLoading || state.isSigningIn
                 )
                 
                 Spacer(modifier = Modifier.height(16.dp))

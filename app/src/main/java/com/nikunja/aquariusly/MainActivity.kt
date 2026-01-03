@@ -7,6 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.*
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.rememberNavController
 import com.nikunja.aquariusly.ui.navigation.NavGraph
 import com.nikunja.aquariusly.ui.theme.AquariuslyTheme
@@ -21,7 +22,13 @@ class MainActivity : ComponentActivity() {
     }
     
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
+        
+        // Keep splash screen visible while loading initial data
+        var keepSplashVisible = true
+        splashScreen.setKeepOnScreenCondition { keepSplashVisible }
+        
         enableEdgeToEdge()
         
         val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -33,6 +40,12 @@ class MainActivity : ComponentActivity() {
         setContent {
             var onboardingCompleted by remember { mutableStateOf(hasCompletedOnboarding) }
             var initialChatId by remember { mutableStateOf(deepLinkChatId) }
+            
+            // Dismiss splash after 5 seconds (for debugging - remove later)
+            LaunchedEffect(Unit) {
+                // kotlinx.coroutines.delay(5000L)
+                keepSplashVisible = false
+            }
             
             AquariuslyTheme {
                 val navController = rememberNavController()
