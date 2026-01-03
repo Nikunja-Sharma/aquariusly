@@ -45,7 +45,7 @@ android {
         debug {
             isMinifyEnabled = false
             signingConfig = signingConfigs.getByName("release")
-            buildConfigField("String", "BASE_URL", "\"https://ai-api.isdev.in/api/\"")
+            buildConfigField("String", "BASE_URL", "\"http://localhost:3000/api/\"")
             buildConfigField("Boolean", "DEBUG_MODE", "true")
         }
         release {

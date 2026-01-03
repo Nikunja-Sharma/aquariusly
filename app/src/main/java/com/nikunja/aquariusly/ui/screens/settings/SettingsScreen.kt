@@ -1,5 +1,11 @@
 package com.nikunja.aquariusly.ui.screens.settings
 
+import android.Manifest
+import android.content.Intent
+import android.os.Build
+import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -19,10 +25,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.app.NotificationManagerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import coil.compose.AsyncImage
 import com.nikunja.aquariusly.ui.theme.UnifiedAIColors
 import com.nikunja.aquariusly.ui.theme.UnifiedTheme
@@ -38,6 +49,39 @@ fun SettingsScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val colors = UnifiedTheme.colors
+    val context = LocalContext.current
+
+    // Check notification permission status
+    var notificationsEnabled by remember {
+        mutableStateOf(NotificationManagerCompat.from(context).areNotificationsEnabled())
+    }
+    
+    // Track if permission was already requested
+    var permissionRequested by remember { mutableStateOf(false) }
+
+    // Permission launcher for Android 13+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        notificationsEnabled = isGranted
+        permissionRequested = true
+        // If denied, open settings
+        if (!isGranted) {
+            val intent = Intent().apply {
+                action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
+                putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+            }
+            context.startActivity(intent)
+        }
+    }
+
+    // Refresh notification status when screen resumes
+    val lifecycleOwner = LocalLifecycleOwner.current
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            notificationsEnabled = NotificationManagerCompat.from(context).areNotificationsEnabled()
+        }
+    }
 
     LaunchedEffect(state.error) {
         state.error?.let { error ->
@@ -148,9 +192,16 @@ fun SettingsScreen(
                 SettingsToggleItem(
                     icon = Icons.Default.Notifications,
                     title = "Notifications",
-                    subtitle = "Receive push notifications",
-                    isChecked = state.notificationsEnabled,
-                    onToggle = viewModel::toggleNotifications,
+                    subtitle = if (notificationsEnabled) "Push notifications enabled" else "Tap to enable notifications",
+                    isChecked = notificationsEnabled,
+                    onToggle = {
+                        // Always open system settings (for both enable and disable)
+                        val intent = Intent().apply {
+                            action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
+                            putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                        }
+                        context.startActivity(intent)
+                    },
                     colors = colors
                 )
                 SettingsToggleItem(

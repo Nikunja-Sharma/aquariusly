@@ -7,6 +7,7 @@ import com.nikunja.aquariusly.domain.model.AIModels
 import com.nikunja.aquariusly.domain.model.AIProvider
 import com.nikunja.aquariusly.domain.model.ChatActionType
 import com.nikunja.aquariusly.domain.model.Message
+import com.nikunja.aquariusly.domain.model.MessageAttachment
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,11 +38,14 @@ class ChatViewModel @Inject constructor() : ViewModel() {
             is ChatEvent.SelectHistory -> selectHistory(event.historyId)
             is ChatEvent.NewChat -> newChat()
             is ChatEvent.ClearError -> clearError()
+            is ChatEvent.AddAttachment -> addAttachment(event.attachment)
+            is ChatEvent.RemoveAttachment -> removeAttachment(event.attachment)
         }
     }
     
     private fun sendMessage(content: String) {
-        if (content.isBlank()) return
+        val currentAttachments = _state.value.attachments
+        if (content.isBlank() && currentAttachments.isEmpty()) return
         
         viewModelScope.launch {
             val activeActions = _state.value.activeActions
@@ -51,7 +55,8 @@ class ChatViewModel @Inject constructor() : ViewModel() {
                 id = UUID.randomUUID().toString(),
                 content = content.trim(),
                 isFromUser = true,
-                modelId = model.id
+                modelId = model.id,
+                attachments = currentAttachments
             )
             
             _state.update { 
@@ -60,15 +65,16 @@ class ChatViewModel @Inject constructor() : ViewModel() {
                     inputText = "",
                     isLoading = true,
                     activeActions = emptySet(),
+                    attachments = emptyList(),
                     isActionsExpanded = false
                 )
             }
             
-            delay(if (activeActions.isNotEmpty()) 2500 else 1500)
+            delay(if (activeActions.isNotEmpty() || currentAttachments.isNotEmpty()) 2500 else 1500)
             
             val aiResponse = Message(
                 id = UUID.randomUUID().toString(),
-                content = generateMockResponse(content, model, activeActions),
+                content = generateMockResponse(content, model, activeActions, currentAttachments),
                 isFromUser = false,
                 modelId = model.id
             )
@@ -80,6 +86,14 @@ class ChatViewModel @Inject constructor() : ViewModel() {
                 )
             }
         }
+    }
+    
+    private fun addAttachment(attachment: MessageAttachment) {
+        _state.update { it.copy(attachments = it.attachments + attachment) }
+    }
+    
+    private fun removeAttachment(attachment: MessageAttachment) {
+        _state.update { it.copy(attachments = it.attachments.filter { a -> a.id != attachment.id }) }
     }
     
     private fun selectModel(model: AIModel) {
@@ -168,8 +182,19 @@ class ChatViewModel @Inject constructor() : ViewModel() {
     private fun generateMockResponse(
         query: String, 
         model: AIModel, 
-        actions: Set<ChatActionType>
+        actions: Set<ChatActionType>,
+        attachments: List<MessageAttachment> = emptyList()
     ): String {
+        val attachmentContext = when {
+            attachments.any { it.type == com.nikunja.aquariusly.domain.model.AttachmentType.IMAGE } ->
+                "Image Analysis\n\nI can see the image you uploaded. "
+            attachments.any { it.type == com.nikunja.aquariusly.domain.model.AttachmentType.PDF } ->
+                "PDF Analysis\n\nI've analyzed the PDF document. "
+            attachments.isNotEmpty() ->
+                "File Analysis\n\nI've processed the file you uploaded. "
+            else -> ""
+        }
+        
         val actionContext = when {
             actions.contains(ChatActionType.WEB_SEARCH) -> 
                 "Web Search Results\n\nI searched the web and found relevant information:\n\n"
@@ -186,6 +211,6 @@ class ChatViewModel @Inject constructor() : ViewModel() {
             else -> ""
         }
         
-        return "${actionContext}I'm ${model.name}, and I'd be happy to help! This is a demo response showcasing the Aquariusly interface with ${if (actions.isNotEmpty()) "active tools" else "standard mode"}."
+        return "${attachmentContext}${actionContext}I'm ${model.name}, and I'd be happy to help! This is a demo response showcasing the Aquariusly interface with ${if (actions.isNotEmpty() || attachments.isNotEmpty()) "active tools/attachments" else "standard mode"}."
     }
 }

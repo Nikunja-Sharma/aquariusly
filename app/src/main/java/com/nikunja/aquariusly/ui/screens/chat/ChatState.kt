@@ -5,6 +5,7 @@ import com.nikunja.aquariusly.domain.model.AIModels
 import com.nikunja.aquariusly.domain.model.AIProvider
 import com.nikunja.aquariusly.domain.model.ChatActionType
 import com.nikunja.aquariusly.domain.model.Message
+import com.nikunja.aquariusly.domain.model.MessageAttachment
 
 data class ChatHistory(
     val id: String,
@@ -23,6 +24,7 @@ data class ChatState(
     val isDrawerOpen: Boolean = false,
     val isActionsExpanded: Boolean = false,
     val activeActions: Set<ChatActionType> = emptySet(),
+    val attachments: List<MessageAttachment> = emptyList(),
     val chatHistories: List<ChatHistory> = emptyList(),
     val selectedHistoryId: String? = null,
     val expandedProviders: Set<AIProvider> = setOf(AIProvider.OPENAI),
@@ -40,4 +42,6 @@ sealed class ChatEvent {
     data class SelectHistory(val historyId: String) : ChatEvent()
     data object NewChat : ChatEvent()
     data object ClearError : ChatEvent()
+    data class AddAttachment(val attachment: MessageAttachment) : ChatEvent()
+    data class RemoveAttachment(val attachment: MessageAttachment) : ChatEvent()
 }

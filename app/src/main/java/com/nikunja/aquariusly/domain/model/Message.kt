@@ -6,7 +6,8 @@ data class Message(
     val isFromUser: Boolean,
     val timestamp: Long = System.currentTimeMillis(),
     val modelId: String? = null,
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val attachments: List<MessageAttachment> = emptyList()
 )
 
 data class Conversation(
