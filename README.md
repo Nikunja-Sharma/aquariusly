@@ -10,7 +10,7 @@ Get the latest APK from the [Releases](https://github.com/Nikunja-Sharma/aquariu
 
 | Version | Release Date | Download |
 |---------|--------------|----------|
-| v1.0.0  | Coming Soon  | -        |
+| v1.0    | January 4, 2026 | [Download APK](https://github.com/Nikunja-Sharma/aquariusly/releases/tag/v1.0) |
 
 ## Installation
 
