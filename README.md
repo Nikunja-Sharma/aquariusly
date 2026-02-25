@@ -30,12 +30,12 @@ See [CHANGELOG.md](CHANGELOG.md) for version history and release notes.
 
 ## Privacy & Terms
 
-- [Privacy Policy](https://aquariusly.com/privacy)
-- [Terms of Service](https://aquariusly.com/terms)
+- [Privacy Policy](https://aquariusly.pro/privacy)
+- [Terms of Service](https://aquariusly.pro/terms)
 
 ## Support
 
-Having issues? [Open an issue](https://github.com/Nikunja-Sharma/aquariusly/issues) or contact us at support@aquariusly.com.
+Having issues? [Open an issue](https://github.com/Nikunja-Sharma/aquariusly/issues) or contact us at support@aquariusly.pro.
 
 ## License
 
